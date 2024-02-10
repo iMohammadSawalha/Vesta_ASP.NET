@@ -16,6 +16,10 @@ namespace Vesta.Models
 
         public ICollection<WorkspaceUser>? WorkspaceUsers { get; set; }
 
+        [StringLength(64)]
+        public string? DefaultWorkspaceUrl { get; set; }
+        public Workspace Workspace { get; set; } = null!;
+
         public ICollection<UserToken>? UserTokens { get; set; }
     }
 }

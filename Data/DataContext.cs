@@ -76,6 +76,35 @@ namespace Vesta.Data
                 .WithMany(u => u.UserTokens)
                 .HasForeignKey(t => t.UserEmail);
 
+
+
+            // Default workspace for a user
+            // (1) User to (1) Workspace
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Workspace)
+                .WithOne()
+                .HasForeignKey<User>(u => u.DefaultWorkspaceUrl);
+
+
+            
+            // Convert User Email to Lowercase
+            modelBuilder.Entity<User>()
+                .Property(u => u.Email)
+                .HasConversion(
+                    email => email.ToLower(),
+                    email => email
+                );
+
+
+
+            // Convert Workspace Url to Lowercase
+            modelBuilder.Entity<Workspace>()
+                .Property(w => w.Url)
+                .HasConversion(
+                    url => url.ToLower(),
+                    url => url
+                );
+
         }
     }
 }

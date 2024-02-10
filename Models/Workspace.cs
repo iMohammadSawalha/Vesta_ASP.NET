@@ -26,7 +26,6 @@ namespace Vesta.Models
 
         public ICollection<WorkspaceUser> WorkspaceUsers { get; set; } = null!;
 
-
         public void CreateDefaultColumns()
             {
                 Columns = new List<Column>
