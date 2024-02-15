@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Vesta.Data;
+using Vesta.Interfaces;
+using Vesta.Repositories;
+using Vesta.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -13,6 +16,8 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration["Vesta:ConnectionString"]);
 });
+builder.Services.AddScoped<IUserRepository,UserRepository>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
