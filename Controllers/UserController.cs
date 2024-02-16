@@ -19,7 +19,7 @@ namespace Vesta.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] CreateUserRequestDTO register_params)
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequestDTO register_params)
         {
             if(register_params.Image != null && register_params.Image != string.Empty)
                 try{await ImageUrlValidator.IsValidImageUrl(register_params.Image,1);}
@@ -49,12 +49,13 @@ namespace Vesta.Controllers
 
             return Ok("Registration successful.");
         }
+
         [HttpPost("send-confirmation-code")]
         public async Task<IActionResult> SendConfirmationEmail([FromBody] ConfirmationEmailRequestDTO confirmation_params)
         {
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
-                
+
             try{
                 await _emailService.SendRandomEmailVerificationCode(confirmation_params.Email);
                 return Ok("Code has been sent.");

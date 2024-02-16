@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Vesta.DataTransferObjects.User
 {
-    public class CreateUserRequestDTO
+    public class RegisterUserRequestDTO
     {
         [Required(ErrorMessage = "Email is required!.")]
         [EmailAddress(ErrorMessage = "Invalid Email Address!.")]
