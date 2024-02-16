@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vesta.DataTransferObjects.User;
 using Vesta.Helpers;
 using Vesta.Interfaces;
+using Vesta.Models;
 
 namespace Vesta.Controllers
 {
@@ -30,25 +31,40 @@ namespace Vesta.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userRegistrationResult = await _userrepository.CreateUserAsync(register_params);
-
-            return userRegistrationResult switch
+            var existingUser = await _userrepository.GetUserByEmailAsync(register_params.Email);
+            if(existingUser != null)
+                return Conflict("Email address already in use.");
+            
+            var newUser = new User()
             {
-                409 => Conflict(),
-                500 => Problem(),
-                _ => Ok(),
+                Email = register_params.Email,
+                HashedPassword = BCryptHelper.HashPassword(register_params.Password),
+                Image = register_params.Image
             };
+            try{
+                await _userrepository.CreateUserAsync(newUser);
+            }catch{
+                return Problem("Registration failed due to server error.");
+            }
+
+            return Ok("Registration successful.");
         }
         [HttpPost("send-confirmation-code")]
         public async Task<IActionResult> SendConfirmationEmail([FromBody] ConfirmationEmailRequestDTO confirmation_params)
         {
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
+                
             try{
                 await _emailService.SendRandomEmailVerificationCode(confirmation_params.Email);
-                return Ok();
+                return Ok("Code has been sent.");
+                
             }catch(Exception ex){
-                return Problem(ex.Message);
+
+                if(ex.Message == "Unknown")
+                    return Problem("An Unknown error occurred while sending a verification code to your email.");
+
+                return BadRequest(ex.Message);
             }
         }
         

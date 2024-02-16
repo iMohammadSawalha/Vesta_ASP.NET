@@ -14,27 +14,19 @@ namespace Vesta.Repositories
         {
             _context = context;
         }
-        public async Task<int> CreateUserAsync(CreateUserRequestDTO register_params)
+
+
+
+        public async Task CreateUserAsync(User user)
         {
-            try{
-            var isEmailAlreadyUsed = await _context.Users.FindAsync(register_params.Email);
-                if(isEmailAlreadyUsed != null)
-                    return 409;
-            var newUser = new User()
-            {
-                Email = register_params.Email,
-                HashedPassword = BCryptHelper.HashPassword(register_params.Password),
-                Image = register_params.Image
-            };
-            await _context.Users.AddAsync(newUser);
+            await _context.Users.AddAsync(user);
             _context.SaveChanges();
-            return 200;
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return 500;
-            }
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string userEmail)
+        {
+            var user = await _context.Users.FindAsync(userEmail);
+            return user;
         }
     }
 }

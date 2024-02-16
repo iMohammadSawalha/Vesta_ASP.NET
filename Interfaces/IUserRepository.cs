@@ -1,9 +1,11 @@
-using Vesta.DataTransferObjects.User;
+using Vesta.Models;
 
 namespace Vesta.Interfaces
 {
     public interface IUserRepository
     {
-        Task<int> CreateUserAsync(CreateUserRequestDTO register_params);
+        Task CreateUserAsync(User user);
+
+        Task<User?> GetUserByEmailAsync(string userEmail);
     };
 }

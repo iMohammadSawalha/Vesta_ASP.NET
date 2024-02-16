@@ -16,6 +16,8 @@ namespace Vesta.Services
         private readonly IWebHostEnvironment _hostEnvironment;
         private readonly List<SentCodeRecord> SentCodesList;
 
+        private readonly int MinutesPeriodBetweenCodes;
+
         public EmailService(IConfiguration configuration, IWebHostEnvironment hostEnvironment)
         {
             _configuration = configuration;
@@ -25,6 +27,7 @@ namespace Vesta.Services
             _senderHostPort = _configuration.GetValue<int>("Vesta:SenderHostPort");
             _hostEnvironment = hostEnvironment;
             SentCodesList = new List<SentCodeRecord>{};
+            MinutesPeriodBetweenCodes = 5;
         }
 
         private async Task SendEmailAsync(string recipientEmail, string subject, string message)
@@ -47,7 +50,7 @@ namespace Vesta.Services
             }
             catch
             {
-                throw new Exception("An Unknown error occurred while sending a verification code to your email");
+                throw new Exception("Unknown");
             }
         }
         private async Task SendEmailVerificationCode(string recipientEmail, string subject, string code)
@@ -62,10 +65,10 @@ namespace Vesta.Services
         }
         public async Task SendRandomEmailVerificationCode(string recipientEmail)
         {
-            if(HasSentCodeOlderThanMinutes(recipientEmail,minutesPeriod:5))
-                return;
+            if(HasSentCodeWithinPeriod(recipientEmail,minutesPeriod:MinutesPeriodBetweenCodes))
+                throw new Exception($"Please hold off for another {MinutesPeriodBetweenCodes} minutes before requesting another code.");
                 
-            string generatedCode = CustomCodeGenerator.GenerateSimpleCode(Length:6);
+            string generatedCode = CustomCodeGenerator.GenerateSimpleCode(Length:MinutesPeriodBetweenCodes);
 
             var sentCodeRecord = new SentCodeRecord()
             {
@@ -80,7 +83,7 @@ namespace Vesta.Services
         }
         public bool VerifyEmailCode(string recipientEmail, string code)
         {
-            if(HasSentCodeOlderThanMinutes(recipientEmail,minutesPeriod:5))
+            if(!HasSentCodeWithinPeriod(recipientEmail,minutesPeriod:MinutesPeriodBetweenCodes))
                 return false;
             
             var record = SentCodesList.Find(r => r.Email == recipientEmail);
@@ -92,19 +95,19 @@ namespace Vesta.Services
             return true;
         }
 
-        private bool HasSentCodeOlderThanMinutes(string recipientEmail,int minutesPeriod = 5)
+        private bool HasSentCodeWithinPeriod(string recipientEmail,int minutesPeriod)
         {
             var record = SentCodesList.Find(r => r.Email == recipientEmail);
 
             if(record == null)
                 return false;
 
-            bool isOld = DateTime.Now.Subtract(record.CreationDate).TotalMinutes >=  minutesPeriod;
+            bool isWithinPeriod = DateTime.Now.Subtract(record.CreationDate).TotalMinutes <=  minutesPeriod;
 
-                if(isOld)
+                if(!isWithinPeriod)
                     SentCodesList.Remove(record);
 
-            return isOld;
+            return isWithinPeriod;
         }
         private class SentCodeRecord
         {
