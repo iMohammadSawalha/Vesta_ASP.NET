@@ -1,6 +1,4 @@
 using Vesta.Data;
-using Vesta.DataTransferObjects.User;
-using Vesta.Helpers;
 using Vesta.Interfaces;
 using Vesta.Models;
 

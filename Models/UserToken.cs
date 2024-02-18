@@ -13,6 +13,9 @@ namespace Vesta.Models
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+        [Required]
+        public DateTime ExpirationDate { get; set; }
+
         public User User { get; set; } = null!;
 
         [Required]
